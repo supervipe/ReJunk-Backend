@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: rejunk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rejunk
+      POSTGRES_USER: rejunk
+      POSTGRES_PASSWORD: rejunk!123
+    ports:
+      - "5432:5432"
+    volumes:
+      - rejunk_db_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rejunk-api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: rejunk
+      DB_USER: rejunk
+      DB_PASS: rejunk!123
+    ports:
+      - "8080:8080"
+
+volumes:
+  rejunk_db_data:
