@@ -1,5 +1,6 @@
 package com.rejunk.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rejunk.domain.enums.AccountStatus;
 import com.rejunk.domain.enums.UserRole;
 import jakarta.persistence.*;
@@ -48,12 +49,15 @@ public class User {
     private Instant createdAt;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CollectionRequest> collectionRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Order> orders = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Notification> notifications = new ArrayList<>();
 
     @PrePersist
