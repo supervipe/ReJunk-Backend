@@ -34,4 +34,14 @@ public class OrderItem {
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
+
+    public void setQuantity(int i) {
+        this.quantity = i;}
+
+    public int getQuantity()
+    {return this.quantity;
+    }
+
 }
