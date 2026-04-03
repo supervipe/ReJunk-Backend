@@ -12,5 +12,6 @@ public class CreateOrderRequest {
 
     private UUID buyerId;
     private List<UUID> listingIds;
+    private double amount;
 
 }

@@ -113,8 +113,7 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        order.setOrderStatus(dto.getOrderStatus());
-
+        order.setOrderStatus(OrderStatus.valueOf(dto.getStatus().toUpperCase()));
         return toResponse(orderRepository.save(order));
     }
 

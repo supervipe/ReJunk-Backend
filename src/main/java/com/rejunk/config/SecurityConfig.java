@@ -25,7 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
  *
  * NOTE: /health endpoint removed as requested.
  */
-@Configuration
+/*@Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -70,7 +70,8 @@ public class SecurityConfig {
         // Remove/comment it before your final demo/submission.
         http.authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
-        );
+        );*/
+
 
         // =========================
         // OPTION B (NORMAL)
@@ -85,8 +86,40 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
         )
         .httpBasic(Customizer.withDefaults());
-        */
+
 
         return http.build();
+    }
+}*/
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final DbUserDetailsService userDetailsService;
+
+    public SecurityConfig(DbUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    // Authentication provider
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    // Password encoder bean
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Authentication manager bean
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
