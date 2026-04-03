@@ -1,6 +1,6 @@
 package com.rejunk.controller;
 
-import com.rejunk.domain.model.Notification;
+import com.rejunk.dto.notification.NotificationResponse;
 import com.rejunk.service.NotificationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +18,12 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<Notification> getNotificationsByUser(@PathVariable UUID userId) {
+    public List<NotificationResponse> getNotificationsByUser(@PathVariable UUID userId) {
         return notificationService.getNotificationsByUser(userId);
     }
 
     @PatchMapping("/{id}/read")
-    public Notification markAsRead(@PathVariable UUID id) {
+    public NotificationResponse markAsRead(@PathVariable UUID id) {
         return notificationService.markAsRead(id);
     }
 }
