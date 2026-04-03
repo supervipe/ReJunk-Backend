@@ -1,10 +1,7 @@
 package com.rejunk.dto.order;
 
 import com.rejunk.domain.enums.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class OrderResponse {
 
     private UUID id;
@@ -22,5 +20,9 @@ public class OrderResponse {
     private OrderStatus orderStatus;
     private Instant createdAt;
     private List<OrderItemResponse> items;
+    private UUID buyerId;
+    private String status;
+    private double amount;
+
 
 }
