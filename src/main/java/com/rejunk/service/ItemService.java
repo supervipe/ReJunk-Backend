@@ -1,5 +1,6 @@
 package com.rejunk.service;
 
+import com.rejunk.domain.enums.NotificationType;
 import com.rejunk.domain.model.CollectionRequest;
 import com.rejunk.domain.model.Item;
 import com.rejunk.dto.item.CreateItemRequest;
@@ -16,11 +17,14 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final CollectionRequestRepository collectionRequestRepository;
+    private final NotificationService notificationService;
 
     public ItemService(ItemRepository itemRepository,
-                       CollectionRequestRepository collectionRequestRepository) {
+                       CollectionRequestRepository collectionRequestRepository,
+                       NotificationService notificationService) {
         this.itemRepository = itemRepository;
         this.collectionRequestRepository = collectionRequestRepository;
+        this.notificationService = notificationService;
     }
 
     public Item createItem(CreateItemRequest dto) {
@@ -35,7 +39,15 @@ public class ItemService {
                 .condition(dto.getCondition())
                 .build();
 
-        return itemRepository.save(item);
+        Item saved = itemRepository.save(item);
+
+        notificationService.createNotification(
+                request.getCustomer().getId(),
+                NotificationType.ITEM_ADDED,
+                "Your item '" + saved.getTitle() + "' has been added."
+        );
+
+        return saved;
     }
 
     public List<Item> getItemsByCollectionRequest(UUID collectionRequestId) {
@@ -54,6 +66,15 @@ public class ItemService {
         item.setCondition(dto.getItemCondition());
         item.setEvaluatedPrice(dto.getEvaluatedPrice());
 
-        return itemRepository.save(item);
+        Item saved = itemRepository.save(item);
+
+        notificationService.createNotification(
+                saved.getCollectionRequest().getCustomer().getId(),
+                //NotificationType.ITEM_EVALUATED,
+                NotificationType.ITEM_PROCESSED,
+                "Your item '" + saved.getTitle() + "' has been evaluated."
+        );
+
+        return saved;
     }
 }

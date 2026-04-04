@@ -1,5 +1,6 @@
 package com.rejunk.service;
 
+import com.rejunk.domain.enums.NotificationType;
 import com.rejunk.domain.enums.PaymentStatus;
 import com.rejunk.domain.enums.RequestStatus;
 import com.rejunk.domain.model.CollectionRequest;
@@ -17,11 +18,14 @@ public class CollectionRequestService {
 
     private final CollectionRequestRepository collectionRequestRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public CollectionRequestService(CollectionRequestRepository collectionRequestRepository,
-                                    UserRepository userRepository) {
+                                    UserRepository userRepository,
+                                    NotificationService notificationService) {
         this.collectionRequestRepository = collectionRequestRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public CollectionRequest createRequest(CreateCollectionRequest dto) {
@@ -60,6 +64,14 @@ public class CollectionRequestService {
 
         request.setRequestStatus(status);
 
-        return collectionRequestRepository.save(request);
+        CollectionRequest saved = collectionRequestRepository.save(request);
+
+        notificationService.createNotification(
+                saved.getCustomer().getId(),
+                NotificationType.COLLECTION_REQUEST_UPDATED,
+                "Your collection request status has been updated to " + saved.getRequestStatus() + "."
+        );
+
+        return saved;
     }
 }
