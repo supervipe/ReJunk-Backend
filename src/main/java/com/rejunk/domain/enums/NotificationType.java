@@ -10,6 +10,7 @@ public enum NotificationType {
     ACCOUNT_SUSPENDED,
 
     COLLECTION_REQUEST_UPDATED,
-    ITEM_ADDED
+    ITEM_ADDED,
+    ITEM_PROCESSED
 
 }
