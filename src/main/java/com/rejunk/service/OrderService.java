@@ -1,6 +1,7 @@
 package com.rejunk.service;
 
 import com.rejunk.domain.enums.ListingStatus;
+import com.rejunk.domain.enums.NotificationType;
 import com.rejunk.domain.enums.OrderStatus;
 import com.rejunk.domain.model.Listing;
 import com.rejunk.domain.model.Order;
@@ -19,7 +20,9 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -27,13 +30,16 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
+    private final NotificationService notificationService;
 
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
-                        ListingRepository listingRepository) {
+                        ListingRepository listingRepository,
+                        NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -64,10 +70,22 @@ public class OrderService {
             item.setUnitPrice(listing.getPrice());
 
             items.add(item);
-
             total = total.add(listing.getPrice());
 
             listing.setListingStatus(ListingStatus.SOLD);
+
+            UUID sellerId = listing.getItem()
+                    .getCollectionRequest()
+                    .getCustomer()
+                    .getId();
+
+            String message = "Your item '" + listing.getItem().getTitle() + "' has been sold.";
+
+            notificationService.createNotification(
+                    sellerId,
+                    NotificationType.ITEM_SOLD,
+                    message
+            );
         }
 
         order.setItems(items);
