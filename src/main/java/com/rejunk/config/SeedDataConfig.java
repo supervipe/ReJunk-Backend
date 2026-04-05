@@ -23,6 +23,8 @@ public class SeedDataConfig {
             ListingRepository listingRepository,
             NotificationRepository notificationRepository,
             OrderRepository orderRepository,
+            PayoutRecordRepository payoutRecordRepository,
+            OrderItemRepository orderItemRepository,
             PasswordEncoder encoder
     ) {
         return args -> {
@@ -142,32 +144,86 @@ public class SeedDataConfig {
 
             orderRepository.saveAll(List.of(order1, order2));
 
+            // ORDER ITEMS
+            OrderItem orderItem1 = OrderItem.builder()
+                    .order(order1)
+                    .listing(listing2) // SOLD listing
+                    .unitPrice(new BigDecimal("40.00"))
+                    .build();
+
+            OrderItem orderItem2 = OrderItem.builder()
+                    .order(order2)
+                    .listing(listing3)
+                    .unitPrice(new BigDecimal("60.00"))
+                    .build();
+
+            orderItemRepository.saveAll(List.of(orderItem1, orderItem2));
+
+            // PAYOUTS
+            PayoutRecord payout1 = PayoutRecord.builder()
+                    .orderItem(orderItem1)
+                    .seller(customer1)
+                    .saleAmount(new BigDecimal("40.00"))
+                    .platformCommissionPct(new BigDecimal("50.00"))
+                    .platformAmount(new BigDecimal("20.00"))
+                    .sellerAmount(new BigDecimal("20.00"))
+                    .payoutStatus(PayoutStatus.PROCESSED)
+                    .build();
+
+            PayoutRecord payout2 = PayoutRecord.builder()
+                    .orderItem(orderItem2)
+                    .seller(customer2)
+                    .saleAmount(new BigDecimal("60.00"))
+                    .platformCommissionPct(new BigDecimal("50.00"))
+                    .platformAmount(new BigDecimal("30.00"))
+                    .sellerAmount(new BigDecimal("30.00"))
+                    .payoutStatus(PayoutStatus.PENDING)
+                    .build();
+
+            payoutRecordRepository.saveAll(List.of(payout1, payout2));
+
             // NOTIFICATIONS
             Notification n1 = Notification.builder()
                     .user(customer1)
-                    .message("Your item has been listed!")
+                    .type(NotificationType.ITEM_SOLD)
+                    .message("Your item \"Office Chair\" has been sold.")
                     .read(false)
-                    .type(NotificationType.LISTING_CREATED)
                     .createdAt(Instant.now())
                     .build();
 
             Notification n2 = Notification.builder()
                     .user(customer1)
-                    .message("Your item has been sold!")
+                    .type(NotificationType.PAYOUT_CREATED)
+                    .message("You received a payout of $20.00.")
                     .read(false)
-                    .type(NotificationType.ITEM_SOLD)
                     .createdAt(Instant.now())
                     .build();
 
             Notification n3 = Notification.builder()
                     .user(customer2)
-                    .message("Pickup scheduled successfully.")
+                    .type(NotificationType.ITEM_PROCESSED)
+                    .message("Your purchase of \"Bookshelf\" was successful.")
                     .read(false)
-                    .type(NotificationType.PICKUP_SCHEDULED)
                     .createdAt(Instant.now())
                     .build();
 
-            notificationRepository.saveAll(List.of(n1, n2, n3));
+            Notification n4 = Notification.builder()
+                    .user(customer2)
+                    .type(NotificationType.PAYOUT_CREATED)
+                    .message("Your payout of $30.00 is pending.")
+                    .read(false)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Notification n5 = Notification.builder()
+                    .user(customer1)
+                    .type(NotificationType.LISTING_CREATED)
+                    .message("Your item \"Wooden Table\" is now listed.")
+                    .read(true)
+                    .createdAt(Instant.now())
+                    .build();
+
+            notificationRepository.saveAll(List.of(n1, n2, n3, n4, n5));
         };
     }
 }

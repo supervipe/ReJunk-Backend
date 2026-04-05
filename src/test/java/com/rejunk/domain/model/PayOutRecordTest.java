@@ -14,14 +14,14 @@ class PayoutRecordTest {
     @Test
     void testPayoutRecordProperties() {
         // Create objects for relations
-        Order order = new Order();
+        OrderItem order = new OrderItem();
         User seller = new User();
 
         // Create a PayoutRecord
         PayoutRecord payout = new PayoutRecord();
         UUID payoutId = UUID.randomUUID();
         payout.setId(payoutId);
-        payout.setOrder(order);
+        payout.setOrderItem(order);
         payout.setSeller(seller);
         payout.setSaleAmount(new BigDecimal("100.00"));
         payout.setPlatformCommissionPct(new BigDecimal("10.00"));
@@ -33,7 +33,7 @@ class PayoutRecordTest {
 
         // Assertions
         assertEquals(payoutId, payout.getId());
-        assertEquals(order, payout.getOrder());
+        assertEquals(order, payout.getOrderItem());
         assertEquals(seller, payout.getSeller());
         assertEquals(new BigDecimal("100.00"), payout.getSaleAmount());
         assertEquals(new BigDecimal("10.00"), payout.getPlatformCommissionPct());

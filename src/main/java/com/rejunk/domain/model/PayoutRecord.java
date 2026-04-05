@@ -22,9 +22,9 @@ public class PayoutRecord {
     @Column(name = "payout_id", nullable = false, updatable = false)
     private UUID id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id", nullable = false, unique = true)
+    private OrderItem orderItem;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
