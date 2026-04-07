@@ -104,7 +104,14 @@ public class SeedDataConfig {
                     .condition(ItemCondition.GOOD)
                     .build();
 
-            itemRepository.saveAll(List.of(item1, item2, item3));
+            Item item4 = Item.builder()
+                    .collectionRequest(request2)
+                    .title("Closet")
+                    .description("Large closet")
+                    .condition(ItemCondition.GOOD)
+                    .build();
+
+            itemRepository.saveAll(List.of(item1, item2, item3, item4));
 
             // LISTINGS
             Listing listing1 = Listing.builder()
@@ -125,7 +132,13 @@ public class SeedDataConfig {
                     .listingStatus(ListingStatus.ACTIVE)
                     .build();
 
-            listingRepository.saveAll(List.of(listing1, listing2, listing3));
+            Listing listing4 = Listing.builder()
+                    .item(item4)
+                    .price(new BigDecimal("400.00"))
+                    .listingStatus(ListingStatus.ACTIVE)
+                    .build();
+
+            listingRepository.saveAll(List.of(listing1, listing2, listing3, listing4));
 
             // ORDERS
             Order order1 = Order.builder()
@@ -142,7 +155,14 @@ public class SeedDataConfig {
                     .createdAt(Instant.now())
                     .build();
 
-            orderRepository.saveAll(List.of(order1, order2));
+            Order order3 = Order.builder()
+                    .buyer(customer2)
+                    .totalAmount(new BigDecimal("400.00"))
+                    .orderStatus(OrderStatus.PROCESSING)
+                    .createdAt(Instant.now())
+                    .build();
+
+            orderRepository.saveAll(List.of(order1, order2, order3));
 
             // ORDER ITEMS
             OrderItem orderItem1 = OrderItem.builder()
@@ -157,7 +177,13 @@ public class SeedDataConfig {
                     .unitPrice(new BigDecimal("60.00"))
                     .build();
 
-            orderItemRepository.saveAll(List.of(orderItem1, orderItem2));
+            OrderItem orderItem3 = OrderItem.builder()
+                    .order(order3)
+                    .listing(listing4)
+                    .unitPrice(new BigDecimal("400.00"))
+                    .build();
+
+            orderItemRepository.saveAll(List.of(orderItem1, orderItem2, orderItem3));
 
             // PAYOUTS
             PayoutRecord payout1 = PayoutRecord.builder()

@@ -9,6 +9,7 @@ import com.rejunk.domain.model.OrderItem;
 import com.rejunk.domain.model.PayoutRecord;
 import com.rejunk.domain.model.User;
 import com.rejunk.dto.orderItem.CreateOrderItemRequest;
+import com.rejunk.dto.orderItem.OrderItemResponse;
 import com.rejunk.repository.ListingRepository;
 import com.rejunk.repository.NotificationRepository;
 import com.rejunk.repository.OrderItemRepository;
@@ -155,12 +156,27 @@ public class OrderItemService {
         notificationRepository.save(notification);
     }
 
-    public List<OrderItem> getOrderItemsByOrder(UUID orderId) {
-        return orderItemRepository.findByOrderId(orderId);
+    public List<OrderItemResponse> getOrderItemsByOrder(UUID orderId) {
+        return orderItemRepository.findByOrderId(orderId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public OrderItem getOrderItemById(UUID id) {
-        return orderItemRepository.findById(id)
+    public OrderItemResponse getOrderItemById(UUID id) {
+        OrderItem orderItem = orderItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order item not found"));
+        return mapToResponse(orderItem);
+    }
+
+    private OrderItemResponse mapToResponse(OrderItem orderItem) {
+        return OrderItemResponse.builder()
+                .orderItemId(orderItem.getId())
+                .orderId(orderItem.getOrder().getId())
+                .listingId(orderItem.getListing().getId())
+                .itemTitle(orderItem.getListing().getItem().getTitle())
+                .price(orderItem.getUnitPrice())
+                .listingStatus(orderItem.getListing().getListingStatus().name())
+                .build();
     }
 }

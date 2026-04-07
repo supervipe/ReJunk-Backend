@@ -2,6 +2,7 @@ package com.rejunk.controller;
 
 import com.rejunk.domain.model.OrderItem;
 import com.rejunk.dto.orderItem.CreateOrderItemRequest;
+import com.rejunk.dto.orderItem.OrderItemResponse;
 import com.rejunk.service.OrderItemService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +25,12 @@ public class OrderItemController {
     }
 
     @GetMapping("/{id}")
-    public OrderItem getOrderItemById(@PathVariable UUID id) {
+    public OrderItemResponse getOrderItemById(@PathVariable UUID id) {
         return orderItemService.getOrderItemById(id);
     }
 
     @GetMapping("/order/{orderId}")
-    public List<OrderItem> getOrderItemsByOrder(@PathVariable UUID orderId) {
+    public List<OrderItemResponse> getOrderItemsByOrder(@PathVariable UUID orderId) {
         return orderItemService.getOrderItemsByOrder(orderId);
     }
 }

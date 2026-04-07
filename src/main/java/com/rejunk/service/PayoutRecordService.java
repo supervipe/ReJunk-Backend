@@ -1,10 +1,15 @@
 package com.rejunk.service;
 
+import com.rejunk.domain.enums.ListingStatus;
+import com.rejunk.domain.enums.PayoutStatus;
+import com.rejunk.domain.model.Listing;
 import com.rejunk.domain.model.OrderItem;
 import com.rejunk.domain.model.PayoutRecord;
 import com.rejunk.domain.model.User;
 import com.rejunk.dto.payout.CreatePayoutRequest;
+import com.rejunk.dto.payout.PayoutResponse;
 import com.rejunk.dto.payout.UpdatePayoutStatusRequest;
+import com.rejunk.repository.ListingRepository;
 import com.rejunk.repository.OrderItemRepository;
 import com.rejunk.repository.PayoutRecordRepository;
 import org.springframework.stereotype.Service;
@@ -19,14 +24,17 @@ public class PayoutRecordService {
 
     private final PayoutRecordRepository payoutRecordRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ListingRepository listingRepository;
 
     public PayoutRecordService(PayoutRecordRepository payoutRecordRepository,
-                               OrderItemRepository orderItemRepository) {
+                               OrderItemRepository orderItemRepository,
+                               ListingRepository listingRepository) {
         this.payoutRecordRepository = payoutRecordRepository;
         this.orderItemRepository = orderItemRepository;
+        this.listingRepository = listingRepository;
     }
 
-    public PayoutRecord createPayout(CreatePayoutRequest dto) {
+    public PayoutResponse createPayout(CreatePayoutRequest dto) {
         OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())
                 .orElseThrow(() -> new RuntimeException("Order item not found"));
 
@@ -52,26 +60,52 @@ public class PayoutRecordService {
                 .platformCommissionPct(commissionPct)
                 .sellerAmount(sellerAmount)
                 .platformAmount(platformAmount)
+                .payoutStatus(PayoutStatus.PENDING)
                 .build();
 
-        return payoutRecordRepository.save(payoutRecord);
+        return mapToResponse(payoutRecordRepository.save(payoutRecord));
     }
 
-    public List<PayoutRecord> getPayoutsBySeller(UUID sellerId) {
-        return payoutRecordRepository.findBySellerId(sellerId);
-    }
-
-    public PayoutRecord getPayoutById(UUID id) {
-        return payoutRecordRepository.findById(id)
+    public PayoutResponse getPayoutById(UUID id) {
+        PayoutRecord payout = payoutRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payout record not found"));
+
+        return mapToResponse(payout);
     }
 
-    public PayoutRecord updatePayoutStatus(UUID id, UpdatePayoutStatusRequest dto) {
+    public List<PayoutResponse> getPayoutsBySeller(UUID sellerId) {
+        return payoutRecordRepository.findBySellerId(sellerId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    public PayoutResponse updatePayoutStatus(UUID id, UpdatePayoutStatusRequest dto) {
         PayoutRecord payoutRecord = payoutRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payout record not found"));
 
         payoutRecord.setPayoutStatus(dto.getPayoutStatus());
 
-        return payoutRecordRepository.save(payoutRecord);
+        PayoutRecord updatedPayoutRecord = payoutRecordRepository.save(payoutRecord);
+        if(updatedPayoutRecord.getPayoutStatus() == PayoutStatus.PROCESSED) {
+            OrderItem orderItem = updatedPayoutRecord.getOrderItem();
+            Listing listing = orderItem.getListing();
+            listing.setListingStatus(ListingStatus.SOLD);
+            listingRepository.save(listing);
+        }
+        return mapToResponse(updatedPayoutRecord);
+    }
+
+    private PayoutResponse mapToResponse(PayoutRecord payout) {
+        return PayoutResponse.builder()
+                .payoutId(payout.getId())
+                .orderItemId(payout.getOrderItem().getId())
+                .sellerId(payout.getSeller().getId())
+                .saleAmount(payout.getSaleAmount())
+                .platformAmount(payout.getPlatformAmount())
+                .sellerAmount(payout.getSellerAmount())
+                .payoutStatus(payout.getPayoutStatus().name())
+                .createdAt(payout.getCreatedAt())
+                .build();
     }
 }
