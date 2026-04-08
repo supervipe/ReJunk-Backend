@@ -4,6 +4,7 @@ import com.rejunk.domain.model.User;
 import com.rejunk.dto.auth.AuthResponse;
 import com.rejunk.dto.auth.LoginRequest;
 import com.rejunk.dto.auth.RegisterRequest;
+import com.rejunk.security.JwtService;
 import com.rejunk.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,12 +14,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final JwtService jwtService;
 
-    public AuthController(UserService userService, AuthenticationManager authenticationManager) {
+    public AuthController(
+            UserService userService,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService
+    ) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -31,7 +38,13 @@ public class AuthController {
 
         User savedUser = userService.registerUser(user);
 
+        String token = jwtService.generateToken(
+                savedUser.getEmail(),
+                savedUser.getRole().name()
+        );
+
         return new AuthResponse(
+                token,
                 savedUser.getId().toString(),
                 savedUser.getFullName(),
                 savedUser.getEmail(),
@@ -51,7 +64,13 @@ public class AuthController {
 
         User user = userService.getUserByEmail(request.getEmail());
 
+        String token = jwtService.generateToken(
+                user.getEmail(),
+                user.getRole().name()
+        );
+
         return new AuthResponse(
+                token,
                 user.getId().toString(),
                 user.getFullName(),
                 user.getEmail(),

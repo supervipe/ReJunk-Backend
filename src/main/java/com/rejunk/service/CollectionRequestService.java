@@ -74,4 +74,42 @@ public class CollectionRequestService {
 
         return saved;
     }
+
+    public CollectionRequest getRequestById(UUID requestId) {
+        return collectionRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Collection request not found"));
+    }
+
+    public CollectionRequest payRequest(UUID requestId) {
+        CollectionRequest request = collectionRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Collection request not found"));
+
+        if (request.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new RuntimeException("Collection request is already paid");
+        }
+
+        request.setPaymentStatus(PaymentStatus.PAID);
+
+        if (request.getRequestStatus() == RequestStatus.SUBMITTED) {
+            request.setRequestStatus(RequestStatus.PAID);
+        }
+
+        return collectionRequestRepository.save(request);
+    }
+
+    public CollectionRequest cancelRequest(UUID requestId) {
+        CollectionRequest request = collectionRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Collection request not found"));
+
+        if (request.getRequestStatus() == RequestStatus.COLLECTED ||
+                request.getRequestStatus() == RequestStatus.EVALUATED ||
+                request.getRequestStatus() == RequestStatus.CLOSED ||
+                request.getRequestStatus() == RequestStatus.CANCELED) {
+            throw new RuntimeException("This collection request cannot be canceled");
+        }
+
+        request.setRequestStatus(RequestStatus.CANCELED);
+
+        return collectionRequestRepository.save(request);
+    }
 }

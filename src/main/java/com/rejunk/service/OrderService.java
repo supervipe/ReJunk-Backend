@@ -15,6 +15,8 @@ import com.rejunk.repository.ListingRepository;
 import com.rejunk.repository.OrderRepository;
 import com.rejunk.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,6 +43,7 @@ public class OrderService {
     }
 
     @Transactional
+    @Builder
     public OrderResponse createOrder(CreateOrderRequest dto) {
 
         User buyer = userRepository.findById(dto.getBuyerId())

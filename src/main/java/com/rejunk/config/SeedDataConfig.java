@@ -1,41 +1,255 @@
 package com.rejunk.config;
 
-import com.rejunk.domain.enums.AccountStatus;
-import com.rejunk.domain.enums.UserRole;
-import com.rejunk.domain.model.User;
-import com.rejunk.repository.UserRepository;
+import com.rejunk.domain.enums.*;
+import com.rejunk.domain.model.*;
+import com.rejunk.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
 @Configuration
 public class SeedDataConfig {
 
     @Bean
-    CommandLineRunner seedUsers(UserRepository userRepository, PasswordEncoder encoder) {
+    CommandLineRunner seedAll(
+            UserRepository userRepository,
+            CollectionRequestRepository collectionRequestRepository,
+            ItemRepository itemRepository,
+            ListingRepository listingRepository,
+            NotificationRepository notificationRepository,
+            OrderRepository orderRepository,
+            PayoutRecordRepository payoutRecordRepository,
+            OrderItemRepository orderItemRepository,
+            PasswordEncoder encoder
+    ) {
         return args -> {
-            if (!userRepository.existsByEmail("admin@rejunk.com")) {
-                User admin = new User();
-                admin.setFullName("Admin User");
-                admin.setEmail("admin@rejunk.com");
-                admin.setPhone("0000000000");
-                admin.setPasswordHash(encoder.encode("admin123"));
-                admin.setRole(UserRole.ADMIN);
-                admin.setStatus(AccountStatus.ACTIVE);
-                userRepository.save(admin);
-            }
 
-            if (!userRepository.existsByEmail("customer@rejunk.com")) {
-                User customer = new User();
-                customer.setFullName("Test Customer");
-                customer.setEmail("customer@rejunk.com");
-                customer.setPhone("1111111111");
-                customer.setPasswordHash(encoder.encode("customer123"));
-                customer.setRole(UserRole.CUSTOMER);
-                customer.setStatus(AccountStatus.ACTIVE);
-                userRepository.save(customer);
-            }
+            if (userRepository.count() > 2) return;
+
+            // USERS
+            User admin = User.builder()
+                    .fullName("Admin User")
+                    .email("admin@rejunk.com")
+                    .phone("0000000000")
+                    .passwordHash(encoder.encode("admin123"))
+                    .role(UserRole.ADMIN)
+                    .status(AccountStatus.ACTIVE)
+                    .build();
+
+            User customer1 = User.builder()
+                    .fullName("John Customer")
+                    .email("customer1@rejunk.com")
+                    .phone("1111111111")
+                    .passwordHash(encoder.encode("customer123"))
+                    .role(UserRole.CUSTOMER)
+                    .status(AccountStatus.ACTIVE)
+                    .build();
+
+            User customer2 = User.builder()
+                    .fullName("Jane Customer")
+                    .email("customer2@rejunk.com")
+                    .phone("2222222222")
+                    .passwordHash(encoder.encode("customer123"))
+                    .role(UserRole.CUSTOMER)
+                    .status(AccountStatus.ACTIVE)
+                    .build();
+
+            userRepository.saveAll(List.of(admin, customer1, customer2));
+
+            // COLLECTION REQUESTS
+            CollectionRequest request1 = CollectionRequest.builder()
+                    .customer(customer1)
+                    .pickupAddress("123 Main Street")
+                    .preferredPickupTime(Instant.now())
+                    .pickupFee(new BigDecimal("25.00"))
+                    .paymentStatus(PaymentStatus.PAID)
+                    .requestStatus(RequestStatus.SUBMITTED)
+                    .build();
+
+            CollectionRequest request2 = CollectionRequest.builder()
+                    .customer(customer2)
+                    .pickupAddress("456 Oak Avenue")
+                    .preferredPickupTime(Instant.now())
+                    .pickupFee(new BigDecimal("30.00"))
+                    .paymentStatus(PaymentStatus.UNPAID)
+                    .requestStatus(RequestStatus.SUBMITTED)
+                    .build();
+
+            collectionRequestRepository.saveAll(List.of(request1, request2));
+
+            // ITEMS
+            Item item1 = Item.builder()
+                    .collectionRequest(request1)
+                    .title("Wooden Table")
+                    .description("Dining table")
+                    .condition(ItemCondition.GOOD)
+                    .build();
+
+            Item item2 = Item.builder()
+                    .collectionRequest(request1)
+                    .title("Office Chair")
+                    .description("Comfortable chair")
+                    .condition(ItemCondition.FAIR)
+                    .build();
+
+            Item item3 = Item.builder()
+                    .collectionRequest(request2)
+                    .title("Bookshelf")
+                    .description("Large bookshelf")
+                    .condition(ItemCondition.GOOD)
+                    .build();
+
+            Item item4 = Item.builder()
+                    .collectionRequest(request2)
+                    .title("Closet")
+                    .description("Large closet")
+                    .condition(ItemCondition.GOOD)
+                    .build();
+
+            itemRepository.saveAll(List.of(item1, item2, item3, item4));
+
+            // LISTINGS
+            Listing listing1 = Listing.builder()
+                    .item(item1)
+                    .price(new BigDecimal("80.00"))
+                    .listingStatus(ListingStatus.ACTIVE)
+                    .build();
+
+            Listing listing2 = Listing.builder()
+                    .item(item2)
+                    .price(new BigDecimal("40.00"))
+                    .listingStatus(ListingStatus.SOLD)
+                    .build();
+
+            Listing listing3 = Listing.builder()
+                    .item(item3)
+                    .price(new BigDecimal("60.00"))
+                    .listingStatus(ListingStatus.ACTIVE)
+                    .build();
+
+            Listing listing4 = Listing.builder()
+                    .item(item4)
+                    .price(new BigDecimal("400.00"))
+                    .listingStatus(ListingStatus.ACTIVE)
+                    .build();
+
+            listingRepository.saveAll(List.of(listing1, listing2, listing3, listing4));
+
+            // ORDERS
+            Order order1 = Order.builder()
+                    .buyer(customer1)
+                    .totalAmount(new BigDecimal("40.00"))
+                    .orderStatus(OrderStatus.COMPLETED)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Order order2 = Order.builder()
+                    .buyer(customer2)
+                    .totalAmount(new BigDecimal("60.00"))
+                    .orderStatus(OrderStatus.PROCESSING)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Order order3 = Order.builder()
+                    .buyer(customer2)
+                    .totalAmount(new BigDecimal("400.00"))
+                    .orderStatus(OrderStatus.PROCESSING)
+                    .createdAt(Instant.now())
+                    .build();
+
+            orderRepository.saveAll(List.of(order1, order2, order3));
+
+            // ORDER ITEMS
+            OrderItem orderItem1 = OrderItem.builder()
+                    .order(order1)
+                    .listing(listing2) // SOLD listing
+                    .unitPrice(new BigDecimal("40.00"))
+                    .build();
+
+            OrderItem orderItem2 = OrderItem.builder()
+                    .order(order2)
+                    .listing(listing3)
+                    .unitPrice(new BigDecimal("60.00"))
+                    .build();
+
+            OrderItem orderItem3 = OrderItem.builder()
+                    .order(order3)
+                    .listing(listing4)
+                    .unitPrice(new BigDecimal("400.00"))
+                    .build();
+
+            orderItemRepository.saveAll(List.of(orderItem1, orderItem2, orderItem3));
+
+            // PAYOUTS
+            PayoutRecord payout1 = PayoutRecord.builder()
+                    .orderItem(orderItem1)
+                    .seller(customer1)
+                    .saleAmount(new BigDecimal("40.00"))
+                    .platformCommissionPct(new BigDecimal("50.00"))
+                    .platformAmount(new BigDecimal("20.00"))
+                    .sellerAmount(new BigDecimal("20.00"))
+                    .payoutStatus(PayoutStatus.PROCESSED)
+                    .build();
+
+            PayoutRecord payout2 = PayoutRecord.builder()
+                    .orderItem(orderItem2)
+                    .seller(customer2)
+                    .saleAmount(new BigDecimal("60.00"))
+                    .platformCommissionPct(new BigDecimal("50.00"))
+                    .platformAmount(new BigDecimal("30.00"))
+                    .sellerAmount(new BigDecimal("30.00"))
+                    .payoutStatus(PayoutStatus.PENDING)
+                    .build();
+
+            payoutRecordRepository.saveAll(List.of(payout1, payout2));
+
+            // NOTIFICATIONS
+            Notification n1 = Notification.builder()
+                    .user(customer1)
+                    .type(NotificationType.ITEM_SOLD)
+                    .message("Your item \"Office Chair\" has been sold.")
+                    .read(false)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Notification n2 = Notification.builder()
+                    .user(customer1)
+                    .type(NotificationType.PAYOUT_CREATED)
+                    .message("You received a payout of $20.00.")
+                    .read(false)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Notification n3 = Notification.builder()
+                    .user(customer2)
+                    .type(NotificationType.ITEM_PROCESSED)
+                    .message("Your purchase of \"Bookshelf\" was successful.")
+                    .read(false)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Notification n4 = Notification.builder()
+                    .user(customer2)
+                    .type(NotificationType.PAYOUT_CREATED)
+                    .message("Your payout of $30.00 is pending.")
+                    .read(false)
+                    .createdAt(Instant.now())
+                    .build();
+
+            Notification n5 = Notification.builder()
+                    .user(customer1)
+                    .type(NotificationType.LISTING_CREATED)
+                    .message("Your item \"Wooden Table\" is now listed.")
+                    .read(true)
+                    .createdAt(Instant.now())
+                    .build();
+
+            notificationRepository.saveAll(List.of(n1, n2, n3, n4, n5));
         };
     }
 }

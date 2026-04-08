@@ -1,13 +1,16 @@
 package com.rejunk.dto.listing;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
 @Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+
 public class CreateListingRequest {
 
     private UUID itemId;

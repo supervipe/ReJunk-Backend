@@ -39,4 +39,19 @@ public class CollectionRequestController {
                                           @RequestParam RequestStatus status) {
         return collectionRequestService.updateStatus(id, status);
     }
+
+    @GetMapping("/{id}")
+    public CollectionRequest getRequestById(@PathVariable UUID id) {
+        return collectionRequestService.getRequestById(id);
+    }
+
+    @PatchMapping("/{id}/pay")
+    public CollectionRequest payRequest(@PathVariable UUID id) {
+        return collectionRequestService.payRequest(id);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public CollectionRequest cancelRequest(@PathVariable UUID id) {
+        return collectionRequestService.cancelRequest(id);
+    }
 }
