@@ -1,5 +1,5 @@
 package com.rejunk.domain.enums;
 
 public enum ItemCondition {
-    GOOD, FAIR, POOR
+    GOOD, FAIR, EXCELLENT, POOR
 }
