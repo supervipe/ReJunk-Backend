@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,17 +23,17 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-//@WebMvcTest(CollectionRequestController.class)
-//@AutoConfigureMockMvc(addFilters = false) // disables security for tests
 @WebMvcTest(
         controllers = CollectionRequestController.class,
         excludeAutoConfiguration = {
-                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-                org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
-        }
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        },
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.REGEX,
+                pattern = "com.rejunk.security.*"
+        )
 )
 @AutoConfigureMockMvc(addFilters = false)
-
 class CollectionRequestControllerTest {
 
     @Autowired
@@ -42,8 +44,7 @@ class CollectionRequestControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    //@MockBean
-    //private com.rejunk.security.JwtService jwtService;
+
 
     //  CREATE
     @Test

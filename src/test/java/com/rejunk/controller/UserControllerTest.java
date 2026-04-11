@@ -2,6 +2,7 @@ package com.rejunk.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rejunk.domain.model.User;
+import com.rejunk.security.JwtService;
 import com.rejunk.service.UserService;
 
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,12 @@ import java.util.UUID;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(
+        controllers = UserController.class,
+        excludeAutoConfiguration = SecurityAutoConfiguration.class
+)
 class UserControllerTest {
 
     @Autowired
@@ -28,6 +33,16 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private org.springframework.security.authentication.AuthenticationManager authenticationManager;
+
+    @MockBean
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    @MockBean
+    private com.rejunk.security.DbUserDetailsService dbUserDetailsService;
 
     // GET USER BY ID
     @Test
